@@ -224,7 +224,7 @@ describe NudgeBlueprint do
       pending
     end
     
-    it "selects a start and end point from the blueprint at random and wraps all points between in a block, inserted at the start point" do
+    it "selects a start and end point from top level points of the blueprint at random and wraps all points between in a block, inserted at the start point" do
       Random.stub!(:rand).and_return(2,6)
       @blueprint.wrap_block.should == "block { ref x do float_divide block { block { do int_add ref x } block { do video_mux ref y ref x } block { do int_add } } }\n\n\n"
     end
