@@ -91,11 +91,68 @@ describe NudgeBlueprint do
       @blueprint.mutate_n_points_at_random(1, @writer).should == "block { do foo_bar value «code» do int_add }\n«code»value «int»\n«int»1"
     end
     
-    it "mutates n points at random when called with n" do
-      Random.should_receive(:rand).ordered.with(4).and_return(1)
-      Random.should_receive(:rand).ordered.with(4).and_return(2)
+    it "mutates n points at random when called with n" do      
+      Random.should_receive(:rand).with(4).twice.and_return(2)
+      @blueprint.mutate_n_points_at_random(2, @writer).should == "block { ref x do foo_bar do int_add }\n" 
+    end
+  end
+
+  describe "mutate values at random" do
+    before(:each) do
+      code = "block { ref x value «code» do int_add }\n«int»1\n«code»value «int»\n«int»2"
+      @blueprint = NudgeBlueprint.new(code)
+      @writer = NudgeWriter.new
+      @writer.use_random_values :int
+      @writer.stub!(:random).and_return(NudgeBlueprint.new("do foo_bar"))
+    end
+    
+    it "returns a new blueprint" do
+      @blueprint.mutate_n_values_at_random(1, @writer).should be_kind_of(NudgeBlueprint)
+    end
+    
+    it "does not alter the orginal blueprint" do
+      new_blueprint = @blueprint.mutate_n_values_at_random(1, @writer)
+      new_blueprint.should_not == @blueprint
+    end
+    
+    it "mutates a value at random when called with 1" do
+      pending
+      @blueprint.mutate_n_values_at_random(1, @writer).should == ''
+    end
+    
+    it "mutates n values at random when called with n" do      
+      pending
+    end
+  end
+
+  describe "blending crossover" do
+    before(:each) do
+      @blueprint_a = NudgeBlueprint.new("block { ref x value «code» do int_add }\n«int»1\n«code»value «int»\n«int»2")
+      @blueprint_b = NudgeBlueprint.new("block { ref y ref z value «int» do int_add }\n«int»1")
+    end
+    
+    it "combines some points at random from two blueprints into a new blueprint" do
+      new_blueprint = @blueprint_a.blending_crossover(@blueprint_b)
+      new_blueprint.should_not == @blueprint_a
+      new_blueprint.should_not == @blueprint_b
+    end
+    
+    it "produces a blueprint of with a random number of points whose maximum is the total number of points of the two donor blueprints" do
+      Random.should_receive(:rand).with(7).and_return(3)
+      new_blueprint = @blueprint_a.blending_crossover(@blueprint_b)
+      NudgePoint.from(new_blueprint).points.should == 5
+    end
+    
+    it "does not introduce points into the new blueprint that were not in either of the donor blueprints" do
+      Random.should_receive(:rand).with(7).and_return(3)
+      points_a = NudgePoint.from(@blueprint_a).instance_variable_get("@points")
+      points_b = NudgePoint.from(@blueprint_b).instance_variable_get("@points")
+      points_n = NudgePoint.from(@blueprint_a.blending_crossover(@blueprint_b)).instance_variable_get("@points")
       
-      @blueprint.mutate_n_points_at_random(2, @writer).should == ""
+      points_n.each do |point|
+        (points_a + points_b).collect {|p| p.to_script }.should include(point.to_script)
+      end
+      
     end
   end
 end
