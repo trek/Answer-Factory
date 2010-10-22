@@ -144,7 +144,7 @@ describe NudgeBlueprint do
     end
     
     it "does not introduce points into the new blueprint that were not in either of the donor blueprints" do
-      Random.should_receive(:rand).with(7).and_return(3)
+      Random.should_receive(:rand).with(7).and_return(6)
       points_a = NudgePoint.from(@blueprint_a).instance_variable_get("@points")
       points_b = NudgePoint.from(@blueprint_b).instance_variable_get("@points")
       points_n = NudgePoint.from(@blueprint_a.blending_crossover(@blueprint_b)).instance_variable_get("@points")
