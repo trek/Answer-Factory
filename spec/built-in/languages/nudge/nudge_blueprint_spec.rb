@@ -186,4 +186,29 @@ describe NudgeBlueprint do
     end
   end
 
+  describe "unwrapping a block" do  
+    before(:each) do
+      @blueprint = NudgeBlueprint.new("block { ref x do float_divide block { do int_add ref x} block {do video_mux ref y ref x} block{ do int_add}}")
+    end
+    
+    it "returns a new blueprint" do
+      @blueprint.unwrap_block.should be_kind_of NudgeBlueprint
+    end
+    
+    it "does not alter the orginal blueprint" do
+      new_blueprint = @blueprint.unwrap_block
+      new_blueprint.should_not == @blueprint
+    end
+    
+    it "finds one top level block at random and inserts its points into the blueprint at the point of the original selected block" do
+      # force Array#sample to return a particular item
+      class Array
+        def sample
+          self[2]
+        end
+      end
+      
+      @blueprint.unwrap_block.should == "block { ref x do float_divide block { do int_add ref x } block { do video_mux ref y ref x } do int_add }\n\n"
+    end
+  end
 end

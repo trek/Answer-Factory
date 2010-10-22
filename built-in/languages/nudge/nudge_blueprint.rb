@@ -114,7 +114,7 @@ class NudgeBlueprint < Blueprint
         blocks << [point, i] if point.is_a?(BlockPoint)
       end
       
-      block, index = blocks.shuffle.first
+      block, index = blocks.sample
       
       points[index..index] = block.instance_variable_get(:@points) if block
     end
