@@ -13,6 +13,7 @@ class SplitGroupWinners < Machine
   end
   
   def process_answers
+    @load_scores = true
     @criteria ||= []
     @group_size ||= 10
     
@@ -35,7 +36,7 @@ class SplitGroupWinners < Machine
       rest.concat best.slice!(@maximum..-1)
     end
     
-    return :best => best,
-           :rest => rest
+    label best: best
+    label rest: rest
   end
 end

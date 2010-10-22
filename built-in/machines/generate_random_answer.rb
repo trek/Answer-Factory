@@ -15,9 +15,9 @@ class GenerateRandomAnswers < Machine
     created = []
     
     @number_to_create.times do
-      created << Answer.new(@writer.random)
+      created << make_answer(@writer.random)
     end
     
-    return :created => created
+    label created: created
   end
 end

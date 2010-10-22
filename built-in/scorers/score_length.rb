@@ -6,11 +6,11 @@ class ScoreLength < Scorer
     scores = []
     
     nudge_answers.each do |answer|
-      scores << Score.new(:length, answer.blueprint.length, answer.id)
+      scores << make_score(:length, answer.blueprint.length, answer)
     end
     
     grab_answers.each do |answer|
-      scores << Score.new(:length, answer.blueprint.length, answer.id)
+      scores << make_score(:length, answer.blueprint.length, answer)
     end
     
     scores

@@ -5,6 +5,8 @@ class SplitFiniteScores < Machine
   end
   
   def process_answers
+    @load_scores = true
+    
     best, rest = answers.partition do |answer|
       any_infinite_score = false
       
@@ -16,7 +18,7 @@ class SplitFiniteScores < Machine
       any_infinite_score
     end
     
-    return :best => best,
-           :rest => rest
+    label best: best
+    label rest: rest
   end
 end

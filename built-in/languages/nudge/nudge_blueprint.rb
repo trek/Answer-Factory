@@ -35,7 +35,7 @@ class NudgeBlueprint < Blueprint
     
     n.times do
       n_of_insertion = Random.rand(tree.points - 1) + 1
-      tree.insert_point_after(n_of_insertion, writer.random)
+      tree.insert_point_after(n_of_insertion, NudgePoint.from(writer.random))
     end
     
     NudgeBlueprint.new(tree.to_script)
@@ -44,13 +44,15 @@ class NudgeBlueprint < Blueprint
   def mutate_n_points_at_random (n, writer)
     tree = NudgePoint.from(self)
     
-    i_of_mutation = Random.rand(tree_points ||= tree.points)
-    mutation = NudgePoint.from(writer.random)
-    
-    if i_of_mutation == 0
-      tree = mutation
-    else
-      tree.replace_point_at(i_of_mutation, mutation)
+    n.times do
+      i_of_mutation = Random.rand(tree.points)
+      mutation = NudgePoint.from(writer.random)
+      
+      if i_of_mutation == 0
+        tree = mutation
+      else
+        tree.replace_point_at(i_of_mutation, mutation)
+      end
     end
     
     NudgeBlueprint.new(tree.to_script)
@@ -112,7 +114,7 @@ class NudgeBlueprint < Blueprint
         blocks << [point, i] if point.is_a?(BlockPoint)
       end
       
-      block, index = blocks.shuffle.first
+      block, index = blocks.sample
       
       points[index..index] = block.instance_variable_get(:@points) if block
     end

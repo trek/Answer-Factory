@@ -13,6 +13,7 @@ class CloneGroupWinners < Machine
   end
   
   def process_answers
+    @load_scores = true
     @criteria ||= []
     @group_size ||= 7
     @minimum ||= 1
@@ -33,7 +34,7 @@ class CloneGroupWinners < Machine
       end
     end unless answers.empty? || @group_size == 0
     
-    return :parents => answers,
-           :created => created
+    label parents: answers
+    label created: created
   end
 end

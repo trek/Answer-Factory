@@ -21,15 +21,14 @@ class MutateValues < Machine
     
     answers.each do |answer|
       blueprint = answer.blueprint
-    # progress = parent.progress + 1
       
       @number_to_create.times do
         new_blueprint = blueprint.mutate_n_values_at_random(@values_to_mutate, @writer)
-        created << Answer.new(new_blueprint)
+        created << make_answer(new_blueprint, answer)
       end
     end
     
-    return :parents => answers,
-           :created => created
+    label parents: answers
+    label created: created
   end
 end

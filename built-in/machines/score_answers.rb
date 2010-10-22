@@ -7,9 +7,9 @@ class ScoreAnswers < Machine
   def process_answers
     @scorer_class || raise(SomeErrorClass, "no scorer")
     
-    scores = Factory.score(answers, @scorer_class)
+    scores = @scorer_class.new(answers).score
     Factory.save_scores(scores)
     
-    return :scored => answers
+    label scored: answers
   end
 end

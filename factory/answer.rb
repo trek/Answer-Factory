@@ -1,40 +1,33 @@
 # encoding: UTF-8
 class Answer
+  def Answer.load (id, blueprint, location, created)
+    answer = Answer.new(blueprint)
+    answer.instance_variable_set(:@id, id)
+    answer.instance_variable_set(:@location, location)
+    answer.instance_variable_set(:@created, created)
+    answer
+  end
+  
   def initialize (blueprint)
     @blueprint = blueprint
     @language = blueprint.language
-    @scores = {}
-    
-    @blueprint.force_encoding("utf-8") if "".respond_to?(:force_encoding)
   end
   
-  def blueprint
-    @blueprint
-  end
-  
-  def language
-    @language
-  end
-  
-  def id
-    @id
-  end
-  
-  def location
-    @location
-  end
+  attr_reader :id, :blueprint, :language, :location, :origin, :parent_ids, :created, :archived
   
   def assign (location)
-    @location = location
+    if location.to_s == "archive"
+      @archived = Factory.cycle
+    else
+      @location = location
+    end
+    
     self
   end
   
   def score (score_name)
+    raise "answer loaded without scores; cannot retrieve score" unless @scores
     (score = @scores[score_name.to_sym]) ? score.value : Factory::Infinity
-  end
-  
-  def has_score? (score_name)
-    @scores.has_key?(score_name.to_sym)
   end
   
   def nondominated_vs? (other, criteria)
