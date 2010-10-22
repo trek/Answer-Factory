@@ -152,7 +152,38 @@ describe NudgeBlueprint do
       points_n.each do |point|
         (points_a + points_b).collect {|p| p.to_script }.should include(point.to_script)
       end
-      
     end
   end
+  
+  describe "point crossover" do
+    before(:each) do
+      @blueprint_a = NudgeBlueprint.new("block { ref x block { ref x do int_divide} value «code» do int_add }\n«int»1\n«code»value «int»\n«int»2")
+      @blueprint_b = NudgeBlueprint.new("block { ref y ref z value «int» do int_add }\n«int»1")
+    end
+    
+    it "combines two blueprints into two new blueprints" do
+      new_blueprint_a, new_blueprint_b = @blueprint_a.point_crossover(@blueprint_b)
+      new_blueprint_a.should be_kind_of NudgeBlueprint
+      new_blueprint_b.should be_kind_of NudgeBlueprint
+    end
+    
+    it "does not alter the orginal two blueprints" do
+      new_blueprint_a, new_blueprint_b = @blueprint_a.point_crossover(@blueprint_b)
+      
+      new_blueprint_a.should_not == @blueprint_a
+      new_blueprint_a.should_not == @blueprint_b
+      
+      new_blueprint_b.should_not == @blueprint_a
+      new_blueprint_b.should_not == @blueprint_b
+    end
+    
+    it "swaps a subtree of one blueprint with a subtree of a second blueprint at a randomly selected point in each blueprint" do
+      Random.should_receive(:rand).with(7).and_return(1)
+      Random.should_receive(:rand).with(5).and_return(2)
+      new_blueprint_a, new_blueprint_b = @blueprint_a.point_crossover(@blueprint_b)
+      new_blueprint_a.should == "block { ref z block { ref x do int_divide } value «code» do int_add }\n\n«code»value «int»\n«int»1"
+      new_blueprint_b.should == "block { ref y ref x value «int» do int_add }\n«int»1" 
+    end
+  end
+
 end
