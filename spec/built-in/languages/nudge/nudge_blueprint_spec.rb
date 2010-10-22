@@ -211,4 +211,22 @@ describe NudgeBlueprint do
       @blueprint.unwrap_block.should == "block { ref x do float_divide block { do int_add ref x } block { do video_mux ref y ref x } do int_add }\n\n"
     end
   end
+  
+  describe "wrapping a block" do
+    before(:each) do
+      @blueprint = NudgeBlueprint.new("block { ref x do float_divide block { do int_add ref x} block {do video_mux ref y ref x} block{ do int_add}}")
+    end
+    it "returns a new blueprint" do
+      pending
+    end
+    
+    it "does not alter the original blueprint" do
+      pending
+    end
+    
+    it "selects a start and end point from the blueprint at random and wraps all points between in a block, inserted at the start point" do
+      Random.stub!(:rand).and_return(2,6)
+      @blueprint.wrap_block.should == "block { ref x do float_divide block { block { do int_add ref x } block { do video_mux ref y ref x } block { do int_add } } }\n\n\n"
+    end
+  end
 end
