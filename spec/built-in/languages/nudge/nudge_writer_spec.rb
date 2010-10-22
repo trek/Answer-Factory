@@ -111,43 +111,81 @@ describe NudgeWriter do
   end
   
   describe "float range" do
+    before(:each) do
+      @writer = NudgeWriter.new
+      @writer.block_width 1
+      @writer.use_random_values :float
+      
+      # force value generation
+      Random.should_receive(:rand).with(no_args).ordered.and_return(0.99)
+    end
+    
     it 'defaults to -100 to 100' do
-      pending
+      Random.should_receive(:rand).with(200).ordered.and_return(6)
+      @writer.random.should == "value «float»\n«float»-94.0"
     end
     
     it 'can be set to a range' do
-      pending
+      @writer.float_range(10..400)
+      Random.should_receive(:rand).with(390).ordered.and_return(50)
+      @writer.random.should == "value «float»\n«float»60.0"
     end
     
     it 'can be set to a range in reverse order' do
-      pending
+      @writer.float_range(400..10)
+      Random.should_receive(:rand).with(390).ordered.and_return(50)
+      @writer.random.should == "value «float»\n«float»60.0"
     end
   end
   
   describe "int range" do
+    before(:each) do
+      @writer = NudgeWriter.new
+      @writer.block_width 1
+      @writer.use_random_values :int
+      
+      # force value generation
+      Random.should_receive(:rand).with(no_args).ordered.and_return(0.99)
+    end
+    
     it 'defaults to -100 to 100' do
-      pending
+      Random.should_receive(:rand).with(200).ordered.and_return(49)
+      @writer.random.should == "value «int»\n«int»-51"
     end
     
     it 'can be set to a range' do
-      pending
+      @writer.int_range(-10..212)
+      Random.should_receive(:rand).with(222).ordered.and_return(66)
+      @writer.random.should == "value «int»\n«int»56"
     end
     
     it 'can be set to a range in reverse order' do
-      pending
+      @writer.int_range(40..10)
+      Random.should_receive(:rand).with(30).ordered.and_return(25)
+      @writer.random.should == "value «int»\n«int»35"
     end
   end
 
-  describe "available reference names" do    
-    it "defaults to x1 through x10" do
-      pending
-      @writer.instance_variable_get("@ref_names").should == [:x1, :x2, :x3, :x4, :x5, :x6, :x7, :x8, :x9, :x10]
+  describe "available reference names" do
+    before(:each) do
+      @writer.block_width 1
+      @writer.block_depth 1
+      @writer.weight ref: 1
     end
     
+    describe "defaults" do
+      [:x1, :x2, :x3, :x4, :x5, :x6, :x7, :x8, :x9, :x10].each do |ref|
+        it "contain #{ref}" do
+          refs = @writer.instance_variable_get("@ref_names")
+          refs.should_receive(:shuffle).and_return { [ref] }
+          @writer.random.should == "ref #{ref}\n"
+        end
+      end
+    end
+
     it "are set with use_refs" do
-      pending
-      @writer.use_refs :y5, :image
-      @writer.instance_variable_get("@ref_names").should == [:y5, :image]
+      @writer.use_refs :y5
+      @writer.random.should == "ref y5\n"
     end
     
     it "guards against mistakingly adding language constructs as references" do
@@ -159,13 +197,19 @@ describe NudgeWriter do
   end
   
   describe "available instructions" do
+    before(:each) do
+      @writer.block_depth 1
+      @writer.block_width 1
+      @writer.weight do: 1
+    end
+    
     it "defaults to all Nudge instructions" do
       @writer.instance_variable_get("@do_instructions").should == NudgeInstruction::INSTRUCTIONS.keys
     end
     
     it "are set with use_instructions" do
-      @writer.use_instructions :foo_mix, :foo_splice
-      @writer.instance_variable_get("@do_instructions").should == [:foo_mix, :foo_splice]
+      @writer.use_instructions :foo_mix
+      @writer.random.should == "do foo_mix\n"
     end
     
     it "guards against mistakingly adding language constructs as instructions" do
@@ -190,8 +234,5 @@ describe NudgeWriter do
       @writer.use_random_values :shirt
       @writer.generate_value.should == 'value «shirt»'
     end
-  end
-  
-  describe "generating a footnote" do
   end
 end

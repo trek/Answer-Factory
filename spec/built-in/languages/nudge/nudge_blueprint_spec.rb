@@ -14,8 +14,12 @@ describe NudgeBlueprint do
     end
     
     it "returns a new blueprint" do
-      Random.should_receive(:rand).with(3).and_return(2)
       @blueprint.delete_n_points_at_random(1).should be_kind_of(NudgeBlueprint)
+    end
+    
+    it "does not alter the orginal blueprint" do
+      new_blueprint = @blueprint.delete_n_points_at_random(1)
+      @blueprint.should_not == new_blueprint
     end
     
     it "removes a random point from the program once when called with 1" do
@@ -62,6 +66,36 @@ describe NudgeBlueprint do
       Random.should_receive(:rand).with(4).ordered.and_return(2)
       
       @blueprint.insert_n_points_at_random(2, @writer).should == "block { ref x value «code» do int_add do foo_bar do foo_bar }\n«code»value «int»\n«int»1" 
+    end
+  end
+
+  describe "mutating points at random" do
+    before(:each) do
+      code = "block { ref x value «code» do int_add }\n«int»1\n«code»value «int»\n«int»2"
+      @blueprint = NudgeBlueprint.new(code)
+      @writer = NudgeWriter.new
+      @writer.stub!(:random).and_return(NudgeBlueprint.new("do foo_bar"))
+    end
+    
+    it "returns a new blueprint" do
+      @blueprint.mutate_n_points_at_random(1, @writer).should be_kind_of(NudgeBlueprint)
+    end
+    
+    it "does not alter the orginal blueprint" do
+      new_blueprint = @blueprint.mutate_n_points_at_random(1, @writer)
+      new_blueprint.should_not == @blueprint
+    end
+    
+    it "mutates a point at random when called with 1" do
+      Random.should_receive(:rand).once.with(4).and_return(1)
+      @blueprint.mutate_n_points_at_random(1, @writer).should == "block { do foo_bar value «code» do int_add }\n«code»value «int»\n«int»1"
+    end
+    
+    it "mutates n points at random when called with n" do
+      Random.should_receive(:rand).ordered.with(4).and_return(1)
+      Random.should_receive(:rand).ordered.with(4).and_return(2)
+      
+      @blueprint.mutate_n_points_at_random(2, @writer).should == ""
     end
   end
 end
