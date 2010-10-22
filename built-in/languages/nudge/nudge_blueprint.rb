@@ -44,13 +44,15 @@ class NudgeBlueprint < Blueprint
   def mutate_n_points_at_random (n, writer)
     tree = NudgePoint.from(self)
     
-    i_of_mutation = Random.rand(tree_points ||= tree.points)
-    mutation = NudgePoint.from(writer.random)
+    n.times do
+      i_of_mutation = Random.rand(tree.points)
+      mutation = NudgePoint.from(writer.random)
     
-    if i_of_mutation == 0
-      tree = mutation
-    else
-      tree.replace_point_at(i_of_mutation, mutation)
+      if i_of_mutation == 0
+        tree = mutation
+      else
+        tree.replace_point_at(i_of_mutation, mutation)
+      end
     end
     
     NudgeBlueprint.new(tree.to_script)
