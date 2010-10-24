@@ -22,18 +22,10 @@ class Workstation
     machine_name = machine_name.to_sym
     machine = Object.const_get(class_name).new("#{@name}:#{machine_name}")
     machine.instance_eval(&config) if config
-    
-<<<<<<< HEAD:factory/workstation.rb
-    @machines[machine_name.to_sym] = machine
-    @schedule << machine_name.to_sym
-    machine
-  end
-  
-  def setup
-=======
+
     @machines[machine_name] = machine
     @schedule << machine_name
->>>>>>> 70ac3175d43d63b234dc60e4ae13047530e94346:factory/workstation.rb
+    machine
   end
   
   # Schedules machines in the given order. Default is one schedule item per

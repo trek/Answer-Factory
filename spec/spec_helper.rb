@@ -34,3 +34,10 @@ class FakeBlueprint < NudgeBlueprint
     FakeBlueprint.new("-- fake -- ")
   end
 end
+
+class Factory
+  def self.reset
+    @workstations = nil
+    @schedule = nil
+  end
+end

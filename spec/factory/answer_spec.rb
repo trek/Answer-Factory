@@ -1,14 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe "Answer" do
-  before(:all) do
-    Factory::Infinity = 12
-  end
-  
-  after(:all) do
-    Factory.send(:remove_const, :Infinity)
-  end
-  
   before(:each) do
     @blueprint = FakeBlueprint.new
     @answer = Answer.new(@blueprint)
@@ -19,13 +11,15 @@ describe "Answer" do
   end
   
   describe 'score values' do
-    it 'retrived by name if score exists' do
+    before(:each) do
       @answer.instance_variable_set("@scores", {:awesomeness => Score.new('awesomeness', 5, 0)})
+    end
+    it 'retrived by name if score exists' do
       @answer.score(:awesomeness).should == 5
     end
     
     it 'default to Factory::Infinity if there is no score by that name' do
-      @answer.score(:awesomeness).should == Factory::Infinity
+      @answer.score(:lameitude).should == Factory::Infinity
     end
   end
   

@@ -57,18 +57,5 @@ describe Workstation do
         @workstation.instance_variable_get("@schedule").should == [:first, :zero]
       end
     end
-    
-    describe "running" do
-      it "runs each machine once in the scheduled order" do
-        workstation = Workstation.new('test')
-        zero = workstation.machine('zero', :FakeMachine)
-        first = workstation.machine('first', :FakeMachine)
-        
-        zero.should_receive(:run).once.ordered
-        first.should_receive(:run).once.ordered
-        
-        workstation.run
-      end
-    end
   end
 end

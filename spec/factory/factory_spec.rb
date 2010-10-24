@@ -1,10 +1,12 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 class FakeWorkstation < Workstation; end
 describe Factory do
+  before(:each) do
+    Factory.reset
+  end
+  
   describe "adding a workstation" do
     before(:each) do
-      Factory.setup do
-      end
       @workstation = Factory.workstation('sample', :FakeWorkstation)
     end
     
@@ -24,11 +26,8 @@ describe Factory do
   
   describe "scheduling workstations" do
     before(:each) do
-      Factory.setup do
-      end
       Factory.workstation('sample', :Workstation)
       Factory.workstation('test', :Workstation)
-      
     end
     
     it "occrus by name in the order it was defined" do
@@ -38,14 +37,6 @@ describe Factory do
     it "can be declared in a specific order" do
       Factory.schedule(:test, :sample)
       Factory.instance_variable_get("@schedule").should == [:test, :sample]
-    end
-  end
-  
-  describe "using a database adapter" do
-    it "extends Factory with database behevior" do
-      Factory.should_not respond_to(:set_database)
-      Factory.database('adapter' => 'mysql')
-      Factory.should respond_to(:set_database)
     end
   end
   
