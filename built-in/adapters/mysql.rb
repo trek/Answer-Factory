@@ -22,12 +22,15 @@ module MysqlAdapter
   end
   
   def cycle
+    return @cycle if @cycle
+    
     result = select "SELECT n FROM cycle LIMIT 1"
-    result.fetch_row[0].to_i
+    @cycle = result.fetch_row[0].to_i
   end
   
   def cycle!
     execute "UPDATE cycle SET n=n+1 LIMIT 1"
+    @cycle += 1 if @cycle
   end
   
   def answer_count
