@@ -11,7 +11,7 @@ class SplitFiniteScores < Machine
       any_infinite_score = false
       
       @criteria.each do |score_name|
-        infinite = (answer.score(score_name) == Factory::Infinity)
+        infinite = (answer.get_score(score_name) == Factory::Infinity)
         break if any_infinite_score ||= infinite
       end
       

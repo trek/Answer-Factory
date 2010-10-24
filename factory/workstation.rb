@@ -48,13 +48,11 @@ class Workstation
     @schedule = machine_names.collect {|name| name.to_sym }
   end
   
-  # Called before Factory.workstation config block. Defined by user.
-  # 
+  # Internal use only. Defined by Workstation subclasses.
   def setup
   end
   
   # Internal use only.
-  # 
   def initialize (name)
     @name = name
     @machines = {}
