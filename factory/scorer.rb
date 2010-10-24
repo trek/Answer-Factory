@@ -31,10 +31,7 @@ class Scorer
   #   end
   # 
   def make_score (name, value, answer)
-    score = Score.new(name, value, answer.id)
-    score.instance_variable_set(:@scorer, self.class.to_s)
-    score.instance_variable_set(:@created, Factory.cycle)
-    score
+    Score.new(name.to_s, value.to_f, answer.id, self.class.to_s, Factory.cycle)
   end
   
   # Internal use only. Defined by Scorer subclasses.

@@ -85,7 +85,7 @@ module MysqlAdapter
           value = (row[5] == "Infinity") ? Factory::Infinity : row[5].to_f
           
           scores = answer.instance_variable_get(:@scores) || answer.instance_variable_set(:@scores, {})
-          scores[name.to_sym] = Score.new(name, value, answer.id)
+          scores[name.to_sym] = Score.new(name, value, answer.id, nil, nil)
         end
       end
     else
