@@ -77,6 +77,26 @@ class Factory
     @answer_limit = n
   end
   
+  # Internal use only.
+  def Factory.start (comment = Time.now.strftime("%D %T"))
+    return unless @workstations && @schedule
+    
+    machine_loop = []
+    
+    @schedule.each do |workstation_name|
+      @workstations[workstation_name].instance_eval do
+        @schedule.each do |machine_name|
+          machine_loop << @machines[machine_name]
+        end
+      end
+    end
+    
+    until @answer_limit && Factory.answer_count > @answer_limit
+      machine_loop.each {|m| m.run }
+      Factory.cycle!
+    end
+  end
+  
   # Defined by adapter module:
   #   Factory.answer_count
   #   Factory.cycle
