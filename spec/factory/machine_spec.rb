@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + '/../spec_helper'
 describe Machine do
   describe "adding a route" do
     it "appends to existing routes" do
-      machine = Machine.new("location")
+      machine = Machine.new
     
       machine.send :best => :someplace
       machine.instance_variable_get("@routes").should == {:best => :someplace}
@@ -13,22 +13,8 @@ describe Machine do
     end    
   end
   
-  describe "processing answers" do
-    it "raises NoMethodError if process_answers is undefined and no process block is provided during configuration" do
-      machine = Machine.new("location")
-      lambda { machine.process_answers}.should raise_error(NoMethodError)
-    end
-    
-    it "defaults to calling the process_answers" do
-      machine = Machine.new("location")
-      machine.should_receive(:process_answers)
-      
-      machine.instance_variable_get("@process").call
-    end
-  end
-  
   it "returns answers keyed by language" do
-    machine = Machine.new("location")
+    machine = Machine.new
     
     answer_0 = Answer.new(FakeBlueprint.new)
     answer_1 = Answer.new(FakeBlueprint.new)

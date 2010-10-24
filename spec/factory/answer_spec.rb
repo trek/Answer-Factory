@@ -15,11 +15,11 @@ describe "Answer" do
       @answer.instance_variable_set("@scores", {:awesomeness => Score.new('awesomeness', 5, 0)})
     end
     it 'retrived by name if score exists' do
-      @answer.score(:awesomeness).should == 5
+      @answer.get_score(:awesomeness).should == 5
     end
     
     it 'default to Factory::Infinity if there is no score by that name' do
-      @answer.score(:lameitude).should == Factory::Infinity
+      @answer.get_score(:lameitude).should == Factory::Infinity
     end
   end
   
@@ -83,18 +83,6 @@ describe "Answer" do
       })
       
       @answer.nondominated_vs?(another_answer, [:running,:swimming]).should == true
-    end
-  end
-  
-  describe 'assigning to a location' do
-
-    it 'sets the location' do
-      @answer.assign('somewhere')
-      @answer.location.should == 'somewhere'
-    end
-    
-    it 'returns the answer' do
-      @answer.assign('somewhere').should == @answer
     end
   end
 end
