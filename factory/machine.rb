@@ -156,15 +156,7 @@ class Machine
   end
   
   # Internal use only. Defined by Machine subclasses.
-  # 
   def process_answers
     raise NoMethodError, "define process for machine #{@location} before running factory"
-  end
-  
-  # Internal use only.
-  # 
-  def initialize (location)
-    @location = location
-    @process = proc { process_answers }
   end
 end

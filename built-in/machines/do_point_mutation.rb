@@ -1,5 +1,11 @@
 # encoding: UTF-8
 class DoPointMutation < Machine
+  def initialize
+    @number_to_create = 1
+    @points_to_mutate = 1
+    @writer = Writer.new
+  end
+  
   def create (n)
     @number_to_create = n
   end
@@ -13,10 +19,6 @@ class DoPointMutation < Machine
   end
   
   def process_answers
-    @number_to_create ||= 1
-    @points_to_mutate ||= 1
-    @writer ||= Writer.new
-    
     created = []
     
     answers.each do |answer|

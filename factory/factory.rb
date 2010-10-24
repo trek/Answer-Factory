@@ -1,6 +1,6 @@
 # encoding: UTF-8
 class Factory
-  Infinity = 1e100000000
+  Infinity = 1.0 / 0
   
   # Sets up workstations and their scheduled order. The config block is
   # evaluated in the scope of the Factory object.
@@ -78,17 +78,17 @@ class Factory
     @answer_limit = n
   end
   
-  # Defined by adapter module.
+  # Defined by adapter module:
   #   Factory.answer_count
   #   Factory.cycle
-  # 
-  # Internal use only.
-  #   Factory.set_database (options)
-  #   Factory.migrate
-  #   Factory.zap
-  #   Factory.cycle!
-  #   Factory.count_answers_at_machine (location)
-  #   Factory.load_answers_at_machine (location, load_scores = false)
-  #   Factory.save_answers (answers)
-  #   Factory.save_scores (scores)
+  #   
+  #   Internal use only:
+  #     Factory.set_database (options)
+  #     Factory.migrate
+  #     Factory.zap
+  #     Factory.cycle!
+  #     Factory.count_answers_at_machine (location)
+  #     Factory.load_answers_at_machine (location, load_scores = false)
+  #     Factory.save_answers (answers)
+  #     Factory.save_scores (scores)
 end

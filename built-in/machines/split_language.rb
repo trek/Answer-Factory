@@ -6,7 +6,7 @@ class SplitLanguage < Machine
   
   def process_answers
     best, rest = answers.partition do |answer|
-      languages.include? answer.language
+      @languages.include? answer.language
     end
     
     label best: best

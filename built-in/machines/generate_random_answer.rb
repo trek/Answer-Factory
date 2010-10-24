@@ -1,5 +1,10 @@
 # encoding: UTF-8
 class GenerateRandomAnswers < Machine
+  def initialize
+    @number_to_create = 1
+    @writer = Writer.new
+  end
+  
   def create (n)
     @number_to_create = n
   end
@@ -9,9 +14,6 @@ class GenerateRandomAnswers < Machine
   end
   
   def process_answers
-    @number_to_create ||= 1
-    @writer ||= Writer.new
-    
     created = []
     
     @number_to_create.times do

@@ -1,5 +1,11 @@
 # encoding: UTF-8
 class SplitGroupWinners < Machine
+  def initialize
+    @load_scores = true
+    @criteria = []
+    @group_size = 10
+  end
+  
   def criteria (*score_names)
     @criteria = score_names
   end
@@ -13,10 +19,6 @@ class SplitGroupWinners < Machine
   end
   
   def process_answers
-    @load_scores = true
-    @criteria ||= []
-    @group_size ||= 10
-    
     best = []
     rest = []
     

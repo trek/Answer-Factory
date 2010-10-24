@@ -1,5 +1,10 @@
 # encoding: UTF-8
 class DoRandomDeletion < Machine
+  def initialize
+    @number_to_create = 1
+    @points_to_delete = 1
+  end
+  
   def create (n)
     @number_to_create = n
   end
@@ -9,9 +14,6 @@ class DoRandomDeletion < Machine
   end
   
   def process_answers
-    @number_to_create ||= 1
-    @points_to_delete ||= 1
-    
     created = []
     
     answers.each do |answer|
