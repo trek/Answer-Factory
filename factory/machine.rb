@@ -127,12 +127,8 @@ class Machine
   # Machine#process_answers method definition.
   # 
   def make_answer (blueprint, *parents)
-    answer = Answer.new(blueprint)
-    answer.instance_variable_set(:@location, @location)
-    answer.instance_variable_set(:@origin, @location)
-    answer.instance_variable_set(:@created, Factory.cycle)
-    answer.instance_variable_set(:@parent_ids, parents.collect {|answer| answer.id })
-    answer
+    parent_ids = parents.collect {|answer| answer.id }
+    Answer.new(nil, blueprint, @location, @location, parent_ids, Factory.cycle, nil)
   end
   
   # Returns the number of answers currently at this machine without forcing

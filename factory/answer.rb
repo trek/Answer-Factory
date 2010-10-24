@@ -38,8 +38,14 @@ class Answer
   end
   
   # Internal use only.
-  def initialize (blueprint)
+  def initialize (id, blueprint, location, origin, parent_ids, created, archived)
+    @id = id
     @blueprint = blueprint
     @language = blueprint.language
+    @location = location
+    @origin = origin
+    @parent_ids = parent_ids
+    @created = created
+    @archived = archived
   end
 end

@@ -74,10 +74,7 @@ module MysqlAdapter
           blueprint = Factory.const_get("#{row[1]}Blueprint").new(row[2].force_encoding("utf-8"))
           created = row[3].to_i
           
-          answers << answer = Answer.new(blueprint)
-          answer.instance_variable_set(:@id, id)
-          answer.instance_variable_set(:@location, location)
-          answer.instance_variable_set(:@created, created)
+          answers << answer = Answer.new(id, blueprint, location, nil, nil, created, nil)
           
           last_seen_answer_id = id
         end
@@ -104,10 +101,7 @@ module MysqlAdapter
         blueprint = Factory.const_get("#{row[1]}Blueprint").new(row[2].force_encoding("utf-8"))
         created = row[3].to_i
         
-        answers << answer = Answer.new(blueprint)
-        answer.instance_variable_set(:@id, id)
-        answer.instance_variable_set(:@location, location)
-        answer.instance_variable_set(:@created, created)
+        answers << Answer.new(id, blueprint, location, nil, nil, created, nil)
       end
     end
     
