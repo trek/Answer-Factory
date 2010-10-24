@@ -1,12 +1,14 @@
 # encoding: UTF-8
 class SplitFiniteScores < Machine
+  def initialize
+    @load_scores = true
+  end
+  
   def criteria (*score_names)
     @criteria = score_names
   end
   
   def process_answers
-    @load_scores = true
-    
     best, rest = answers.partition do |answer|
       any_infinite_score = false
       

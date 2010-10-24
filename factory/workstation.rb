@@ -20,7 +20,9 @@ class Workstation
   # 
   def machine (machine_name, class_name = :Machine, &config)
     machine_name = machine_name.to_sym
-    machine = Object.const_get(class_name).new("#{@name}:#{machine_name}")
+    machine = Object.const_get(class_name).new
+    machine.instance_variable_set(:@location, "#{@name}:#{machine_name}")
+    machine.instance_variable_set(:@process, proc { machine.process_answers })
     machine.instance_eval(&config) if config
     
     @machines[machine_name] = machine

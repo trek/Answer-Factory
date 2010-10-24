@@ -5,7 +5,7 @@ class ScoreAnswers < Machine
   end
   
   def process_answers
-    @scorer_class || raise(SomeErrorClass, "no scorer")
+    raise "no scorer specified for #{@location}" unless @scorer_class
     
     scores = @scorer_class.new(answers).score
     Factory.save_scores(scores)

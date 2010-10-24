@@ -1,12 +1,14 @@
 # encoding: UTF-8
 class UnwrapBlock < Machine
+  def initialize
+    @number_to_create = 1
+  end
+  
   def create (n)
     @number_to_create = n
   end
   
   def process_answers
-    @number_to_create ||= 1
-    
     created = []
     
     answers.each do |answer|

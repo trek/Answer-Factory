@@ -1,5 +1,12 @@
 # encoding: UTF-8
 class CloneGroupWinners < Machine
+  def initialize
+    @load_scores = true
+    @criteria = []
+    @group_size = 7
+    @minimum = 1
+  end
+  
   def criteria (*score_names)
     @criteria = score_names
   end
@@ -13,11 +20,6 @@ class CloneGroupWinners < Machine
   end
   
   def process_answers
-    @load_scores = true
-    @criteria ||= []
-    @group_size ||= 7
-    @minimum ||= 1
-    
     created = []
     
     while created.length < @minimum

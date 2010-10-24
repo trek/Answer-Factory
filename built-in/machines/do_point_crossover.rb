@@ -1,12 +1,14 @@
 # encoding: UTF-8
 class DoPointCrossover < Machine
+  def initialize
+    @pairs_to_create = 1
+  end
+  
   def create (n)
     @pairs_to_create = (n.to_f / 2).ceil
   end
   
   def process_answers
-    @pairs_to_create ||= 1
-    
     created = []
     
     answers_keyed_by_language.each do |language, group|

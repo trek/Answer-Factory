@@ -1,5 +1,11 @@
 # encoding: UTF-8
 class SplitNondominated < Machine
+  def initialize
+    @load_scores = true
+    @criteria = []
+    @layers = 1
+  end
+  
   def criteria (*score_names)
     @criteria = score_names
   end
@@ -13,10 +19,6 @@ class SplitNondominated < Machine
   end
   
   def process_answers
-    @load_scores = true
-    @criteria ||= []
-    @layers ||= 1
-    
     best = []
     rest = answers.shuffle
     
