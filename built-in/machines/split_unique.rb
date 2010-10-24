@@ -18,7 +18,7 @@ class SplitUnique < Machine
       end
     end
     
-    return :best => unique_answers,
-           :rest => answers
+    label best: unique_answers
+    label rest: answers
   end
 end

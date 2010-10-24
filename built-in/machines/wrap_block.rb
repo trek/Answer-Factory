@@ -14,11 +14,11 @@ class WrapBlock < Machine
       
       @number_to_create.times do
         new_blueprint = blueprint.wrap_block
-        created << Answer.new(new_blueprint)
+        created << make_answer(new_blueprint, answer)
       end
     end
     
-    return :parents => answers,
-           :created => created
+    label parents: answers
+    label created: created
   end
 end

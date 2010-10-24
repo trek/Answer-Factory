@@ -1,60 +1,170 @@
 # encoding: UTF-8
 class Machine
-  class SomeError < StandardError;end
-  def initialize (location, &config)
-    @location = location.to_s
-    @routes = {}
-    @process = proc { process_answers }
-    @load_scores = true
-    
-    self.instance_eval(&config) if config
-  end
-  
-  def process_answers
-    raise NoMethodError, "define process for machine #{@location} before running factory"
-  end
-  
+  # Defines the process applied to answers by this machine.
+  # 
+  #   Factory.setup do
+  #     workstation :w do
+  #       machine :m do
+  #         process do
+  #           ...
+  #         end
+  #         
+  #         ...
+  #       end
+  #     end
+  #   end
+  # 
+  # Use this method inside a #machine block.
+  # 
   def process (&block)
     @process = block
   end
   
+  # Specifies the location to send answers to designated by the given labels.
+  # These labels must match the labels given to Machine#label.
+  # 
+  #   Factory.setup do
+  #     workstation :w do
+  #       machine :m do
+  #         ...
+  #         
+  #         send group1: "w:m1"
+  #         send group2: "w:m2"
+  #       end
+  #     end
+  #   end
+  # 
+  # Use this method inside a #machine block.
+  # 
   def send (hash)
-    @routes.merge! hash
+    (@routes ||= {}).merge! hash
   end
   
-  def load_without_scores (arg)
-    @load_scores = !arg
+  # Specifies the answers to be referred to by the given labels. These labels
+  # must match the labels given to Machine#send.
+  # 
+  #   def process_answers
+  #     ary1 = []
+  #     ary2 = []
+  #     
+  #     answers.each do |a|
+  #       ...
+  #     end
+  #     
+  #     label group1: ary1
+  #     label group2: ary2
+  #   end
+  # 
+  # Use this method inside a #process block or inside a
+  # Machine#process_answers method definition.
+  # 
+  def label (hash)
+    @labeled_answers.merge! hash
   end
   
+  # Returns an array of the answers currently at this machine. By default,
+  # scores are not loaded. Set @load_scores=true in this machine to override.
+  # 
+  #   def process_answers
+  #     @load_scores = true
+  #     
+  #     answers.each do |a|
+  #       ...
+  #     end
+  #     
+  #     label group1: ary1
+  #     label group2: ary2
+  #   end
+  # 
+  # Use this method inside a #process block or inside a
+  # Machine#process_answers method definition.
+  # 
   def answers
-    @answers
+    @answers ||= Factory.load_answers_at_machine(@location, @load_scores)
   end
   
+  # Returns a hash of the answers currently at this machine, keyed by language
+  # name as a symbol. By default, scores are not loaded. Set @load_scores=true
+  # in this machine to override.
+  # 
+  #   def process_answers
+  #     @load_scores = true
+  #     
+  #     answers_keyed_by_language.each do |language, array|
+  #       ...
+  #     end
+  #     
+  #     label group1: ary1
+  #     label group2: ary2
+  #   end
+  # 
+  # Use this method inside a #process block or inside a
+  # Machine#process_answers method definition.
+  # 
   def answers_keyed_by_language
     hash = Hash.new {|h,k| h[k] = [] }
     
-    @answers.each do |answer|
+    answers.each do |answer|
       hash[answer.language] << answer
     end
     
     hash
   end
   
-  def run
-    @answers = Factory.load_answers(@location, @load_scores)
+  # Returns a new answer with the given blueprint and parents.
+  # 
+  #   def process_answers
+  #     answers.each do |a|
+  #       ary1 << make_answer(a.blueprint, a)
+  #       ary2 << make_answer(a.blueprint.reverse, a)
+  #     end
+  #     
+  #     label group1: ary1
+  #     label group2: ary2
+  #   end
+  # 
+  # Use this method inside a #process block or inside a
+  # Machine#process_answers method definition.
+  # 
+  def make_answer (blueprint, *parents)
+    answer = Answer.new(blueprint)
+    answer.instance_variable_set(:@location, @location)
+    answer.instance_variable_set(:@origin, @location)
+    answer.instance_variable_set(:@created, Factory.cycle)
+    answer.instance_variable_set(:@parent_ids, parents.collect {|answer| answer.id })
+    answer
+  end
+  
+  # Returns the number of answers currently at this machine without forcing
+  # the answers to load.
+  # 
+  #   def process_answers
+  #     if answer_count > 500
+  #       ...
+  #     end
+  #     
+  #     label group1: ary1
+  #   end
+  # 
+  # Use this method inside a #process block or inside a
+  # Machine#process_answers method definition.
+  # 
+  def answer_count
+    return @answers.length if @answers
     
-    raise SomeError unless (output_hash = @process.call).is_a?(Hash)
-    
-    answers_to_save = []
-    
-    output_hash.each do |route_name, output_answers|
-      location = @routes[route_name]
-      
-      output_answers.each do |answer|
-        answers_to_save << answer.assign(location)
-      end
-    end
-    
-    Factory.save_answers(answers_to_save)
+    Factory.count_answers_at_machine(@location)
+  end
+  
+  # Internal use only. Defined by Machine subclasses.
+  # 
+  def process_answers
+    raise NoMethodError, "define process for machine #{@location} before running factory"
+  end
+  
+  # Internal use only.
+  # 
+  def initialize (location)
+    @location = location
+    @process = proc { process_answers }
   end
 end

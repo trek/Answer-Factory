@@ -9,7 +9,7 @@ class RandomGenerator < Workstation
   end
   
   def send (hash)
-    @machines[:generate_random].send created: hash[:created]
+    @machines[:generate_random].send created: hash[:created] if hash[:created]
   end
   
   def setup

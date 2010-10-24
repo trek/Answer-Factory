@@ -3,11 +3,155 @@ module MysqlAdapter
   require 'rubygems'
   require 'mysql'
   
-  Factory::Infinity = 3e+38
-  
   def set_database (db)
     @mysql = Mysql.connect(db['host'], db['user'], db['password'], db['name'], db['port'], db['socket'])
     @mysql.query_with_result = false
+  end
+  
+  def migrate
+    execute "CREATE TABLE answers (`id` int(10) unsigned NOT NULL AUTO_INCREMENT, `blueprint` mediumtext, `language` varchar(50) DEFAULT NULL, `location` varchar(100) DEFAULT NULL, `origin` varchar(100) DEFAULT NULL, `parents` varchar(50) DEFAULT NULL, `created` int(11) DEFAULT NULL, `archived` int(11) DEFAULT NULL, PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8"
+    execute "CREATE TABLE scores (`id` int(10) unsigned NOT NULL AUTO_INCREMENT, `name` varchar(50) DEFAULT NULL, `value` varchar(50) DEFAULT NULL, `scorer` varchar(100) DEFAULT NULL, `created` int(11) DEFAULT NULL, `answer_id` int(11) DEFAULT NULL, PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8"
+    execute "CREATE TABLE cycle (`n` int(10) unsigned NOT NULL)"
+    execute "INSERT INTO cycle (n) VALUES (1)"
+  end
+  
+  def zap
+    execute "TRUNCATE TABLE answers"
+    execute "TRUNCATE TABLE scores"
+    execute "UPDATE cycle SET n=1 LIMIT 1"
+  end
+  
+  def cycle
+    result = select "SELECT n FROM cycle LIMIT 1"
+    result.fetch_row[0].to_i
+  end
+  
+  def cycle!
+    execute "UPDATE cycle SET n=n+1 LIMIT 1"
+  end
+  
+  def answer_count
+    result = select "SELECT COUNT(id) FROM answers"
+    result.fetch_row[0].to_i
+  end
+  
+  def count_answers_at_machine (location)
+    result = select "SELECT COUNT(id) FROM answers WHERE location = '#{location}' AND archived IS NULL"
+    result.fetch_row[0].to_i
+  end
+  
+  def load_answers_at_machine (location, load_scores = false)
+    answers = []
+    
+    if load_scores
+      result = select <<-query
+        SELECT a.id, a.language, a.blueprint, a.created, s3.name, s3.value
+        FROM answers AS a
+        LEFT OUTER JOIN (
+          SELECT s2.name, s2.value, s2.answer_id
+          FROM (
+            SELECT s1.name, s1.value, s1.answer_id
+            FROM scores AS s1
+            ORDER BY s1.id DESC
+          ) AS s2
+          GROUP BY s2.answer_id, s2.name
+          ORDER BY NULL
+        ) AS s3
+        ON a.id = s3.answer_id
+        WHERE location = '#{location}'
+        AND archived IS NULL
+        ORDER BY a.id ASC
+      query
+      
+      last_seen_answer_id = 0
+      
+      # each row is an answer (which may be a repeat) with 0 or 1 associated scores (scores are unique)
+      while row = result.fetch_row
+        id = row[0].to_i
+        
+        # add an answer if the row contains an answer that isn't a repeat of the last answer
+        if id != last_seen_answer_id
+          blueprint = Factory.const_get("#{row[1]}Blueprint").new(row[2].force_encoding("utf-8"))
+          created = row[3].to_i
+          
+          answers << answer = Answer.load(id, blueprint, location, created)
+          last_seen_answer_id = id
+        end
+        
+        # add a score if the row contains a score
+        if name = row[4]
+          name.force_encoding("utf-8")
+          value = (row[5] == "Infinity") ? Factory::Infinity : row[5].to_f
+          
+          scores = answer.instance_variable_get(:@scores) || answer.instance_variable_set(:@scores, {})
+          scores[name.to_sym] = Score.new(name, value, answer.id)
+        end
+      end
+    else
+      result = select <<-query
+        SELECT id, language, blueprint, created
+        FROM answers
+        WHERE location = '#{location}'
+        AND archived IS NULL
+      query
+      
+      while row = result.fetch_row
+        id = row[0].to_i
+        blueprint = Factory.const_get("#{row[1]}Blueprint").new(row[2].force_encoding("utf-8"))
+        created = row[3].to_i
+        
+        answers << Answer.load(id, blueprint, location, created)
+      end
+    end
+    
+    answers
+  end
+  
+  def save_answers (answers)
+    return if answers.empty?
+    
+    existing_answer_values = []
+    created_answer_values = []
+    
+    answers.each do |answer|
+      raise unless answer.location
+      
+      if answer.id
+        existing_answer_values << "(#{answer.id},'#{answer.location}',#{answer.archived || :NULL})"
+      else
+        created_answer_values << "('#{answer.blueprint.gsub(/'/,"\'")}','#{answer.language}','#{answer.location}','#{answer.origin}','#{answer.parent_ids.join("+")}',#{answer.created},#{answer.archived || :NULL})"
+      end
+    end
+    
+    unless existing_answer_values.empty?
+      execute "INSERT INTO answers (id, location, archived) VALUES #{existing_answer_values.join(",")} ON DUPLICATE KEY UPDATE location=VALUES(location), archived=VALUES(archived)"
+    end
+    
+    i = 0
+    
+    while i < created_answer_values.length
+      start_index = i
+      
+      created_answer_values[i..-1].inject(0) do |query_length, string|
+        break if (query_length += string.length + 1) > 900000
+        i += 1
+        query_length
+      end
+      
+      execute "INSERT INTO answers (blueprint, language, location, origin, parents, created, archived) VALUES #{created_answer_values[start_index...i].join(",")}"
+    end
+  end
+  
+  def save_scores (scores)
+    return if scores.empty?
+    
+    values = []
+    
+    scores.each do |score|
+      values << "('#{score.name}','#{score.value}','#{score.scorer}','#{score.created}','#{score.answer_id}')"
+    end
+    
+    execute "INSERT INTO scores (name, value, scorer, created, answer_id) VALUES #{values.join(",")}"
   end
   
   def execute (query)
@@ -19,120 +163,5 @@ module MysqlAdapter
     result = execute(query)
     @mysql.query_with_result = false
     result
-  end
-  
-  def migrate
-    execute "CREATE TABLE answers (id int(10) unsigned NOT NULL AUTO_INCREMENT, blueprint mediumtext, location varchar(100) DEFAULT NULL, language varchar(50) DEFAULT NULL, PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8"
-    execute "CREATE TABLE scores (id int(10) unsigned NOT NULL AUTO_INCREMENT, name varchar(50) DEFAULT NULL, value float DEFAULT NULL, answer_id int(11) DEFAULT NULL, PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8"
-  end
-  
-  def zap
-    execute "TRUNCATE TABLE answers"
-    execute "TRUNCATE TABLE scores"
-  end
-  
-  def load_answers (location, load_scores)
-    load_scores ? load_answers_with_scores(location) : load_answers_without_scores(location)
-  end
-  
-  def load_answers_without_scores (location)
-    result = select <<-query
-      SELECT id, blueprint, language
-      FROM answers
-      WHERE location = '#{location}'
-    query
-    
-    answers = []
-    
-    while row = result.fetch_row
-      answer = Answer.new(const_get("#{row[2]}Blueprint").new(row[1]))
-      answer.instance_variable_set(:@id, row[0])
-      answers << answer
-    end
-    
-    answers
-  end
-  
-  def load_answers_with_scores (location)
-    result = select <<-query
-      SELECT answers.id, answers.blueprint, answers.language, scores.id, scores.name, scores.value
-      FROM answers
-      LEFT OUTER JOIN scores
-      ON answers.id = scores.answer_id
-      WHERE location = '#{location}'
-      ORDER BY answers.id ASC
-    query
-    
-    answers = []
-    last_seen_answer_id = 0
-    
-    # each row is an answer (possibly duplicate) with 0 or 1 associated scores
-    while row = result.fetch_row
-      # add an answer if the row contains an answer that hasn't been seen
-      if row[0] != last_seen_answer_id
-        answer = Answer.new(const_get("#{row[2]}Blueprint").new(row[1]))
-        answer.instance_variable_set(:@id, last_seen_answer_id = row[0])
-        answers << answer
-      end
-      
-      # add a score if the row contains a score
-      if score_id = row[3]
-        score = Score.new(row[4], row[5], answer.id)
-        answer.instance_variable_get(:@scores)[row[4].to_sym] = score
-      end
-    end
-    
-    answers
-  end
-  
-  def save_answers (answers)
-    return if answers.empty?
-    
-    inserts = []
-    discards = []
-    
-    answers.each do |answer|
-      if answer.location.to_s == "discard"
-        discards << answer.id if answer.id
-        next
-      end
-      
-      inserts << "(#{answer.id || :NULL},'#{answer.blueprint.gsub(/'/,"\'")}','#{answer.language}','#{answer.location}')"
-    end
-    
-    unless discards.empty?
-      ids = discards.join(",")
-      execute "DELETE FROM answers WHERE id IN (#{ids})"
-      execute "DELETE FROM scores WHERE answer_id IN (#{ids})"
-    end
-    
-    i = 0
-    
-    while i < inserts.length
-      start_index = i
-      
-      inserts[i..-1].inject(0) do |query_length, string|
-        break if (query_length += string.length + 1) > 900000
-        i += 1
-        query_length
-      end
-      
-      insert_string = inserts[start_index...i].join(",")
-      
-      execute "REPLACE INTO answers (id, blueprint, language, location) VALUES #{insert_string}"
-    end
-  end
-  
-  def save_scores (scores)
-    return if scores.empty?
-    
-    inserts = []
-    
-    scores.each do |score|
-      inserts << "('#{score.name}','#{score.value}','#{score.answer_id}')"
-    end
-    
-    execute "TRUNCATE TABLE scores"
-    execute "INSERT INTO scores (name, value, answer_id) VALUES #{inserts.join(",")}"
   end
 end

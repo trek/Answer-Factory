@@ -9,7 +9,7 @@ class SplitLanguage < Machine
       languages.include? answer.language
     end
     
-    return :best => best,
-           :rest => rest
+    label best: best
+    label rest: rest
   end
 end

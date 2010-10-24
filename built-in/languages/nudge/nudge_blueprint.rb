@@ -47,7 +47,7 @@ class NudgeBlueprint < Blueprint
     n.times do
       i_of_mutation = Random.rand(tree.points)
       mutation = NudgePoint.from(writer.random)
-    
+      
       if i_of_mutation == 0
         tree = mutation
       else

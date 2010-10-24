@@ -84,8 +84,8 @@ class NudgeWriter < Writer
     points = (0...@block_width).collect do
       case Random.rand
         when @block then generate_block(remaining_depth - 1) if remaining_depth > 0
-        when @do    then "do #{@do_instructions.shuffle.first}"
-        when @ref   then "ref #{@ref_names.shuffle.first}"
+        when @do    then "do #{@do_instructions.sample}"
+        when @ref   then "ref #{@ref_names.sample}"
         else generate_value
       end
     end
@@ -96,7 +96,7 @@ class NudgeWriter < Writer
   def generate_value (value_type = nil)
     unless value_type
       value_types = @value_types + @code_type_switch
-      return unless value_type = value_types.shuffle.first
+      return unless value_type = value_types.sample
     end
     
     @footnotes_needed << value_type
@@ -109,10 +109,10 @@ class NudgeWriter < Writer
     
     while value_type = @footnotes_needed.pop
       value_string = case value_type
-        when :bool       then rand < 0.5
+        when :bool       then Random.rand < 0.5
         when :float      then Random.rand(@max_float - @min_float).to_f + @min_float
         when :int        then Random.rand(@max_int - @min_int).to_i + @min_int
-        when :proportion then rand
+        when :proportion then Random.rand
         when :code
           @code_type_switch.delete(:code) unless (@code_recursion -= 1) >= 0
           generate_block(@block_depth)

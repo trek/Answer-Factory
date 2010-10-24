@@ -13,6 +13,7 @@ class SplitNondominated < Machine
   end
   
   def process_answers
+    @load_scores = true
     @criteria ||= []
     @layers ||= 1
     
@@ -41,7 +42,7 @@ class SplitNondominated < Machine
       rest.concat best.slice!(@maximum..-1)
     end
     
-    return :best => best,
-           :rest => rest
+    label best: best
+    label rest: rest
   end
 end

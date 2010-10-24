@@ -16,15 +16,14 @@ class DoRandomDeletion < Machine
     
     answers.each do |answer|
       blueprint = answer.blueprint
-    # progress = parent.progress + 1
       
       @number_to_create.times do
         new_blueprint = blueprint.delete_n_points_at_random(@points_to_delete)
-        created << Answer.new(new_blueprint)
+        created << make_answer(new_blueprint, answer)
       end
     end
     
-    return :parents => answers,
-           :created => created
+    label parents: answers
+    label created: created
   end
 end

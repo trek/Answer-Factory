@@ -4,23 +4,7 @@ class Score
     @name = name.to_s
     @value = value.to_f
     @answer_id = answer_id.to_i
-    
-    @name.force_encoding("utf-8") if "".respond_to?(:force_encoding)
   end
   
-  def id
-    @id
-  end
-  
-  def name
-    @name
-  end
-  
-  def value
-    @value
-  end
-  
-  def answer_id
-    @answer_id
-  end
+  attr_reader :id, :name, :value, :scorer, :created, :answer_id
 end

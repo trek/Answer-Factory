@@ -1,33 +1,72 @@
 # encoding: UTF-8
 class Workstation
-  def initialize (workstation_name, &config)
-    @name = workstation_name.to_sym
-    @machines = {}
-    @schedule = []
-    
-    setup
-    
-    self.instance_eval(&config) if config
-  end
-  
+  # Sets up a new machine with the given machine_name. If a class_name is
+  # provided, sets up a built-in machine; otherwise sets up a generic machine.
+  # The config block is evaluated in the scope of the new machine.
+  # 
+  #   Factory.setup do
+  #     workstation :w do
+  #       machine :my_builtin_machine, :GenerateRandomAnswer do
+  #         ...
+  #       end
+  #       
+  #       machine :my_generic_machine do
+  #         ...
+  #       end
+  #     end
+  #   end
+  # 
+  # Use this method inside a Factory.workstation block.
+  # 
   def machine (machine_name, class_name = :Machine, &config)
-    machine = Object.const_get(class_name).new("#{@name}:#{machine_name}", &config)
+    machine_name = machine_name.to_sym
+    machine = Object.const_get(class_name).new("#{@name}:#{machine_name}")
+    machine.instance_eval(&config) if config
     
+<<<<<<< HEAD:factory/workstation.rb
     @machines[machine_name.to_sym] = machine
     @schedule << machine_name.to_sym
     machine
   end
   
   def setup
+=======
+    @machines[machine_name] = machine
+    @schedule << machine_name
+>>>>>>> 70ac3175d43d63b234dc60e4ae13047530e94346:factory/workstation.rb
   end
   
+  # Schedules machines in the given order. Default is one schedule item per
+  # machine, in order of creation.
+  # 
+  #   Factory.setup
+  #     workstation :w do
+  #       machine :a do ... end
+  #       machine :b do ... end
+  #       machine :c do ... end
+  #     end
+  #     
+  #     # (current schedule is :a, :b, :c)
+  #     
+  #     schedule :a, :b, :c, :c, :b
+  #   end
+  # 
+  # Use this method inside a Factory.workstation block.
+  # 
   def schedule (*machine_names)
     @schedule = machine_names.collect {|name| name.to_sym }
   end
   
-  def run
-    @schedule.each do |machine_name|
-      @machines[machine_name.to_sym].run
-    end
+  # Called before Factory.workstation config block. Defined by user.
+  # 
+  def setup
+  end
+  
+  # Internal use only.
+  # 
+  def initialize (name)
+    @name = name
+    @machines = {}
+    @schedule = []
   end
 end
