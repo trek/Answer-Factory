@@ -78,8 +78,10 @@ class Factory
   end
   
   # Internal use only.
-  def Factory.start (comment = Time.now.strftime("%D %T"))
+  def Factory.start (comment = "")
     return unless @workstations && @schedule
+    
+    Factory.log_comment(comment)
     
     machine_loop = []
     

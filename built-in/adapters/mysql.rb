@@ -13,11 +13,13 @@ module MysqlAdapter
     execute "CREATE TABLE scores (`id` int(10) unsigned NOT NULL AUTO_INCREMENT, `name` varchar(50) DEFAULT NULL, `value` varchar(50) DEFAULT NULL, `scorer` varchar(100) DEFAULT NULL, `created` int(11) DEFAULT NULL, `answer_id` int(11) DEFAULT NULL, PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8"
     execute "CREATE TABLE cycle (`n` int(10) unsigned NOT NULL)"
     execute "INSERT INTO cycle (n) VALUES (1)"
+    execute "CREATE TABLE changelog (`cycle` int(11) NOT NULL, `comment` text, `timestamp` datetime DEFAULT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8"
   end
   
   def zap
     execute "TRUNCATE TABLE answers"
     execute "TRUNCATE TABLE scores"
+    execute "TRUNCATE TABLE changelog"
     execute "UPDATE cycle SET n=1 LIMIT 1"
   end
   
@@ -31,6 +33,10 @@ module MysqlAdapter
   def cycle!
     execute "UPDATE cycle SET n=n+1 LIMIT 1"
     @cycle += 1 if @cycle
+  end
+  
+  def log_comment (comment)
+    execute "INSERT INTO changelog (cycle, comment, timestamp) VALUES (#{cycle},'#{comment.gsub(/'/,"\'")}','#{Time.now}')"
   end
   
   def answer_count
