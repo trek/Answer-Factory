@@ -104,9 +104,7 @@ class Machine
   def answers_keyed_by_language
     hash = Hash.new {|h,k| h[k] = [] }
     
-    answers.each do |answer|
-      hash[answer.language] << answer
-    end
+    answers.each {|answer| hash[answer.language] << answer }
     
     hash
   end
