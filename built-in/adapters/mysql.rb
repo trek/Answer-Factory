@@ -13,21 +13,30 @@ module MysqlAdapter
     execute "CREATE TABLE scores (`id` int(10) unsigned NOT NULL AUTO_INCREMENT, `name` varchar(50) DEFAULT NULL, `value` varchar(50) DEFAULT NULL, `scorer` varchar(100) DEFAULT NULL, `created` int(11) DEFAULT NULL, `answer_id` int(11) DEFAULT NULL, PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8"
     execute "CREATE TABLE cycle (`n` int(10) unsigned NOT NULL)"
     execute "INSERT INTO cycle (n) VALUES (1)"
+    execute "CREATE TABLE changelog (`cycle` int(11) NOT NULL, `comment` text, `timestamp` datetime DEFAULT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8"
   end
   
   def zap
     execute "TRUNCATE TABLE answers"
     execute "TRUNCATE TABLE scores"
+    execute "TRUNCATE TABLE changelog"
     execute "UPDATE cycle SET n=1 LIMIT 1"
   end
   
   def cycle
+    return @cycle if @cycle
+    
     result = select "SELECT n FROM cycle LIMIT 1"
-    result.fetch_row[0].to_i
+    @cycle = result.fetch_row[0].to_i
   end
   
   def cycle!
     execute "UPDATE cycle SET n=n+1 LIMIT 1"
+    @cycle += 1 if @cycle
+  end
+  
+  def log_comment (comment)
+    execute "INSERT INTO changelog (cycle, comment, timestamp) VALUES (#{cycle},'#{comment.gsub(/'/,"\'")}','#{Time.now}')"
   end
   
   def answer_count
@@ -74,10 +83,7 @@ module MysqlAdapter
           blueprint = Factory.const_get("#{row[1]}Blueprint").new(row[2].force_encoding("utf-8"))
           created = row[3].to_i
           
-          answers << answer = Answer.new(blueprint)
-          answer.instance_variable_set(:@id, id)
-          answer.instance_variable_set(:@location, location)
-          answer.instance_variable_set(:@created, created)
+          answers << answer = Answer.new(id, blueprint, location, nil, nil, created, nil)
           
           last_seen_answer_id = id
         end
@@ -88,7 +94,7 @@ module MysqlAdapter
           value = (row[5] == "Infinity") ? Factory::Infinity : row[5].to_f
           
           scores = answer.instance_variable_get(:@scores) || answer.instance_variable_set(:@scores, {})
-          scores[name.to_sym] = Score.new(name, value, answer.id)
+          scores[name.to_sym] = Score.new(name, value, answer.id, nil, nil)
         end
       end
     else
@@ -104,10 +110,7 @@ module MysqlAdapter
         blueprint = Factory.const_get("#{row[1]}Blueprint").new(row[2].force_encoding("utf-8"))
         created = row[3].to_i
         
-        answers << answer = Answer.new(blueprint)
-        answer.instance_variable_set(:@id, id)
-        answer.instance_variable_set(:@location, location)
-        answer.instance_variable_set(:@created, created)
+        answers << Answer.new(id, blueprint, location, nil, nil, created, nil)
       end
     end
     

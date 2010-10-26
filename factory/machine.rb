@@ -37,7 +37,7 @@ class Machine
   # Use this method inside a #machine block.
   # 
   def send (hash)
-    (@routes ||= {}).merge! hash
+    @routes.merge! hash
   end
   
   # Specifies the answers to be referred to by the given labels. These labels
@@ -127,12 +127,8 @@ class Machine
   # Machine#process_answers method definition.
   # 
   def make_answer (blueprint, *parents)
-    answer = Answer.new(blueprint)
-    answer.instance_variable_set(:@location, @location)
-    answer.instance_variable_set(:@origin, @location)
-    answer.instance_variable_set(:@created, Factory.cycle)
-    answer.instance_variable_set(:@parent_ids, parents.collect {|answer| answer.id })
-    answer
+    parent_ids = parents.collect {|answer| answer.id }
+    Answer.new(nil, blueprint, @location, @location, parent_ids, Factory.cycle, nil)
   end
   
   # Returns the number of answers currently at this machine without forcing
@@ -158,5 +154,27 @@ class Machine
   # Internal use only. Defined by Machine subclasses.
   def process_answers
     raise NoMethodError, "define process for machine #{@location} before running factory"
+  end
+  
+  # Internal use only.
+  def run
+    @answers = nil
+    @labeled_answers = {}
+    
+    @process.call
+    
+    answers_to_save = []
+    
+    @labeled_answers.each do |label, output_answers|
+      new_location = @routes[label]
+      
+      answers_to_save.concat(if new_location == "archive"
+        output_answers.collect {|a| a.instance_variable_set(:@archived, Factory.cycle); a }
+      else
+        output_answers.collect {|a| a.instance_variable_set(:@location, new_location); a }
+      end)
+    end
+    
+    Factory.save_answers(answers_to_save)
   end
 end
