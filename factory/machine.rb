@@ -161,7 +161,7 @@ class Machine
     @answers = nil
     @labeled_answers = {}
     
-    @process.call
+    @process ? @process.call : process_answers
     
     answers_to_save = []
     

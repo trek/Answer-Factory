@@ -23,7 +23,6 @@ class Workstation
     machine = Object.const_get(class_name).new
     machine.instance_variable_set(:@routes, {})
     machine.instance_variable_set(:@location, "#{@name}:#{machine_name}")
-    machine.instance_variable_set(:@process, proc { machine.process_answers })
     machine.instance_eval(&config) if config
     
     @machines[machine_name] = machine
