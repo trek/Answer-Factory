@@ -30,6 +30,5 @@ describe Machine do
   end
   
   describe "unknown labels" do
-    
   end
 end

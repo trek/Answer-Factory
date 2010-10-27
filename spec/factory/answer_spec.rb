@@ -40,34 +40,17 @@ describe "Answer" do
     end
     
     it 'is dominated if any of the compared answer\'s scores for any listed criteria is better' do
-      # (id, blueprint, location, origin, parent_ids, created, archived)
-      another_answer = Answer.new(Guid.id, @blueprint, nil, nil, nil, nil, nil)
-      another_answer.instance_variable_set("@scores", {
-        :running => @middle_at_running,
-        :swimming => @best_at_swimming
-      })
-      
-      @answer.instance_variable_set("@scores", {
-        :running => @middle_at_running,
-        :swimming => @middle_at_swimming
-      })
-      
-      @answer.nondominated_vs?(another_answer, [:swimming,:running]).should == false
+      answer = answer_factory('', running: 5, swimming: 10)
+      another_answer = answer_factory('', running: 5, swimming: 1)
+            
+      answer.nondominated_vs?(another_answer, [:swimming,:running]).should == false
     end
     
     it 'is non-dominated if all scores of the comapred answer for all listed criteria are worse' do
-      another_answer = Answer.new(Guid.id, @blueprint, nil, nil, nil, nil, nil)
-      another_answer.instance_variable_set("@scores", {
-        :running => @middle_at_running,
-        :swimming => @middle_at_swimming
-      })
+      answer = answer_factory('', running: 5, swimming: 2)
+      another_answer = answer_factory('', running: 5, swimming: 5)
       
-      @answer.instance_variable_set("@scores", {
-        :running => @middle_at_running,
-        :swimming => @best_at_swimming
-      })
-      
-      @answer.nondominated_vs?(another_answer, [:running,:swimming]).should == true
+      answer.nondominated_vs?(another_answer, [:running,:swimming]).should == true
     end
   
     it 'is non-dominated if all scores of the comapred answer are worse for listed criteria even if unlisted criteria are better' do
