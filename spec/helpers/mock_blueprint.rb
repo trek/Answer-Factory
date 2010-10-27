@@ -25,8 +25,8 @@ class FakeBlueprint < NudgeBlueprint
     FakeBlueprint.new("-- fake -- ")
   end
   
-  def mutate_n_points_at_random (n)
-    FakeBlueprint.new("-- fake -- ")
+  def mutate_n_points_at_random (n, writer)
+    FakeBlueprint.new("-- fake -- ").changed('point_mutation')
   end
   
   def mutate_n_values_at_random (n)
