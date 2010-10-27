@@ -4,8 +4,8 @@ describe CloneGroupWinners do
   before(:each) do
     @machine = CloneGroupWinners.new
     answers = [
-      @a1 = answer_factory('', a:1, b:1),
-      @a2 = answer_factory('', a:2, b:3),
+      @a1 = answer_factory('', a:2, b:1),
+      @a2 = answer_factory('', a:1, b:3),
       @a3 = answer_factory('', a:5, b:3),
       @a4 = answer_factory('', a:10, b:3),
       @a5 = answer_factory('', a:20, b:3),
@@ -20,14 +20,20 @@ describe CloneGroupWinners do
       @a14 = answer_factory('', a:650, b:3),
       @a15 = answer_factory('', a:900, b:3),
     ]
-    @machine.instance_variable_set("@routes", {})
-    Factory.should_receive(:save_answers).and_return(answers)
+    @machine.instance_variable_set("@routes", {
+      :parents => 'originals',
+      :created => 'winners'
+    })
     Factory.should_receive(:load_answers_at_machine).and_return(answers)
   end
   
   describe "clones winners of tournaments" do
     it "it with supplied score names" do
-      pending
+      @machine.criteria :a, :b
+      mock_every_array_sample.and_return([0,1,2,3,4,5,6])
+      @machine.run
+      
+      Factory.should have_answers(@a2).evolved.in_location('winners')
     end
     
     describe "until a minimum number of new answers has been reached" do
@@ -36,12 +42,18 @@ describe CloneGroupWinners do
       end
       
       it "defaulting to 1 new answer" do
-        pending
+        mock_every_array_sample.and_return([0,1,2,3,4,5,6])
+        @machine.run
+        
+        Factory.should have_answers(@a2).evolved.in_location('winners')
       end
       
-      
       it "set to n" do
-        pending
+        @machine.minimum 2
+        mock_every_array_sample.and_return([0,1,2,3,4,5,6], [3,4,5,6,0])
+        @machine.run
+        
+        Factory.should have_answers(@a2,@a1).evolved.in_location('winners')
       end
     end
   end

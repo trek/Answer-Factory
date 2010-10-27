@@ -10,6 +10,10 @@ module Matchers
       self
     end
     
+    def evolved
+      self.evolved_by
+    end
+    
     def in_location(label)
       @labeled = label
       self
