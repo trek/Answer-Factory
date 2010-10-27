@@ -27,7 +27,7 @@ describe CloneGroupWinners do
     Factory.should_receive(:load_answers_at_machine).and_return(answers)
   end
   
-  describe "sends to `created` location, original to `created` location winners of tournaments" do
+  describe "sends  winners to `created` location, originals to `parents` location winners of tournaments" do
     it "of supplied score names" do
       @machine.criteria :a, :b
       mock_every_array_sample.and_return([0,1,2,3,4,5,6])
