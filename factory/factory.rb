@@ -111,6 +111,7 @@ class Factory
   #     Factory.cycle!
   #     Factory.count_answers_at_machine (location)
   #     Factory.load_answers_at_machine (location, load_scores = false)
+  #     Factory.log_comment (comment)
   #     Factory.save_answers (answers)
   #     Factory.save_scores (scores)
 end

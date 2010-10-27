@@ -41,8 +41,15 @@ describe Factory do
   end
   
   describe "running" do
-    it "runs each workstation in the order specified forever" do
-      pending
+    it "logs a supplied comment" do
     end
+    
+    it "calls run on each machine in the scheduled order" do
+    end
+    
+    it "runs until a minimum desired number of answers is reached" do
+      
+    end
+    
   end
 end
