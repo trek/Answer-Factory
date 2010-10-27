@@ -40,15 +40,38 @@ describe Factory do
     end
   end
   
-  describe "running" do
+  describe "starting" do
+    before(:each) do
+      workstation = Factory.workstation('test', :Workstation)
+      @machine1 = workstation.machine('sample1', :DoNothing)
+      @machine2 = workstation.machine('sample2', :DoNothing)
+    end
+    
     it "logs a supplied comment" do
+      Factory.stop_at(10)
+      Factory.should_receive(:answer_count).and_return(0,5,10,11)
+      
+      comment = 'Improved what it does: awesome'
+      Factory.should_receive(:log_comment).with(comment)
+      
+      Factory.start(comment)
     end
     
     it "calls run on each machine in the scheduled order" do
+      Factory.stop_at(2)
+      Factory.should_receive(:answer_count).and_return(1,3)
+      
+      @machine1.should_receive(:run).once.ordered
+      @machine2.should_receive(:run).once.ordered
+      
+      Factory.start
     end
     
     it "runs until a minimum desired number of answers is reached" do
+      Factory.stop_at(20)
+      Factory.should_receive(:answer_count).and_return(1,5,19,21)
       
+      Factory.start
     end
     
   end

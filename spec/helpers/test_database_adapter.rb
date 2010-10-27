@@ -8,7 +8,11 @@ module TestAdapter
   end
   
   def cycle
-    1
+    @cycle || 0
+  end
+  
+  def cycle!
+    @cycle += 1 if @cycle
   end
   
   def save_answers(answers)
