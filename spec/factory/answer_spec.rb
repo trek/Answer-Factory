@@ -24,50 +24,26 @@ describe "Answer" do
     end
   end
   
-  describe 'dominated state' do
-    before(:each) do
-      @best_at_running = Score.new('running', 1, nil, nil, nil)
-      @middle_at_running = Score.new('running', 5, nil, nil, nil)
-      @worst_at_running = Score.new('running', 10, nil, nil, nil)
-      
-      @best_at_swimming = Score.new('swimming', 1, nil, nil, nil)
-      @middle_at_swimming = Score.new('swimming', 10, nil, nil, nil)
-      @worst_at_swimming = Score.new('swimming', 20, nil, nil, nil)
-      
-      @best_at_biking = Score.new('biking', 4, nil, nil, nil)
-      @middle_at_biking = Score.new('biking', 20, nil, nil, nil)
-      @worst_at_biking = Score.new('biking', 100, nil, nil, nil)
-    end
-    
+  describe 'dominated state' do    
     it 'is dominated if any of the compared answer\'s scores for any listed criteria is better' do
       answer = answer_factory('', running: 5, swimming: 10)
-      another_answer = answer_factory('', running: 5, swimming: 1)
+      another_answer = answer_factory('', running: 5, swimming: 1) # <- better swimmer
             
       answer.nondominated_vs?(another_answer, [:swimming,:running]).should == false
     end
     
     it 'is non-dominated if all scores of the comapred answer for all listed criteria are worse' do
-      answer = answer_factory('', running: 5, swimming: 2)
+      answer = answer_factory('', running: 5, swimming: 2) # <- better swimmer
       another_answer = answer_factory('', running: 5, swimming: 5)
       
       answer.nondominated_vs?(another_answer, [:running,:swimming]).should == true
     end
   
     it 'is non-dominated if all scores of the comapred answer are worse for listed criteria even if unlisted criteria are better' do
-      another_answer = Answer.new(Guid.id, @blueprint, nil, nil, nil, nil, nil)
-      another_answer.instance_variable_set("@scores", {
-        :running => @middle_at_running,
-        :swimming => @middle_at_swimming,
-        :biking => @best_at_biking,
-      })
+      another_answer = answer_factory('', running: 5, swimming: 5, biking: 1) # <- very good at biking, but we don't care
+      answer = answer_factory('', running: 5, swimming: 1, biking: 40) # <- best at swimming, miserable biker
       
-      @answer.instance_variable_set("@scores", {
-        :running => @middle_at_running,
-        :swimming => @best_at_swimming,
-        :biking => @worst_at_biking
-      })
-      
-      @answer.nondominated_vs?(another_answer, [:running,:swimming]).should == true
+      answer.nondominated_vs?(another_answer, [:running,:swimming]).should == true
     end
   end
 end
