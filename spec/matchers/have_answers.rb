@@ -49,8 +49,11 @@ module Matchers
         return @difference.empty?
       end
       
+      @difference = []
+      @expected_answers.each do |expected|
+        @difference << expected unless @actual.include?(expected)
+      end
       
-      @difference = (@actual - @expected_answers) | (@expected_answers - @actual)
       @difference.empty?
     end
     

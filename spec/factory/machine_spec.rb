@@ -4,6 +4,7 @@ describe Machine do
   describe "adding a route" do
     it "appends to existing routes" do
       machine = Machine.new
+      machine.instance_variable_set("@routes",{})
     
       machine.send :best => :someplace
       machine.instance_variable_get("@routes").should == {:best => :someplace}
@@ -16,9 +17,9 @@ describe Machine do
   it "returns answers keyed by language" do
     machine = Machine.new
     
-    answer_0 = Answer.new(FakeBlueprint.new)
-    answer_1 = Answer.new(FakeBlueprint.new)
-    answer_2 = Answer.new(NudgeBlueprint.new("block {}"))
+    answer_0 = answer_factory(FakeBlueprint.new)
+    answer_1 = answer_factory(FakeBlueprint.new)
+    answer_2 = answer_factory(NudgeBlueprint.new("block {}"))
     
     machine.instance_variable_set("@answers", [answer_0, answer_1, answer_2])
     

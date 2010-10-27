@@ -4,7 +4,7 @@ describe "Answer" do
   #(id, blueprint, location, origin, parent_ids, created, archived)
   before(:each) do
     @blueprint = FakeBlueprint.new
-    @answer = Answer.new(Guid.id, @blueprint, nil, nil, nil, nil)
+    @answer = Answer.new(Guid.id, @blueprint, nil, nil, nil, nil, nil)
   end
   
   it 'obtains its language from the language of its blueprint' do
@@ -13,7 +13,7 @@ describe "Answer" do
   
   describe 'score values' do
     before(:each) do
-      @answer.instance_variable_set("@scores", {:awesomeness => Score.new('awesomeness', 5, 0)})
+      @answer.instance_variable_set("@scores", {:awesomeness => Score.new('awesomeness', 5, 0, nil, nil)})
     end
     it 'retrived by name if score exists' do
       @answer.get_score(:awesomeness).should == 5
@@ -26,21 +26,22 @@ describe "Answer" do
   
   describe 'dominated state' do
     before(:each) do
-      @best_at_running = Score.new('running', 1, nil)
-      @middle_at_running = Score.new('running', 5, nil)
-      @worst_at_running = Score.new('running', 10, nil)
+      @best_at_running = Score.new('running', 1, nil, nil, nil)
+      @middle_at_running = Score.new('running', 5, nil, nil, nil)
+      @worst_at_running = Score.new('running', 10, nil, nil, nil)
       
-      @best_at_swimming = Score.new('swimming', 1, nil)
-      @middle_at_swimming = Score.new('swimming', 10, nil)
-      @worst_at_swimming = Score.new('swimming', 20, nil)
+      @best_at_swimming = Score.new('swimming', 1, nil, nil, nil)
+      @middle_at_swimming = Score.new('swimming', 10, nil, nil, nil)
+      @worst_at_swimming = Score.new('swimming', 20, nil, nil, nil)
       
-      @best_at_biking = Score.new('biking', 4, nil)
-      @middle_at_biking = Score.new('biking', 20, nil)
-      @worst_at_biking = Score.new('biking', 100, nil)
+      @best_at_biking = Score.new('biking', 4, nil, nil, nil)
+      @middle_at_biking = Score.new('biking', 20, nil, nil, nil)
+      @worst_at_biking = Score.new('biking', 100, nil, nil, nil)
     end
     
     it 'is dominated if any of the compared answer\'s scores for any listed criteria is better' do
-      another_answer = Answer.new(@blueprint)
+      # (id, blueprint, location, origin, parent_ids, created, archived)
+      another_answer = Answer.new(Guid.id, @blueprint, nil, nil, nil, nil, nil)
       another_answer.instance_variable_set("@scores", {
         :running => @middle_at_running,
         :swimming => @best_at_swimming
@@ -55,7 +56,7 @@ describe "Answer" do
     end
     
     it 'is non-dominated if all scores of the comapred answer for all listed criteria are worse' do
-      another_answer = Answer.new(@blueprint)
+      another_answer = Answer.new(Guid.id, @blueprint, nil, nil, nil, nil, nil)
       another_answer.instance_variable_set("@scores", {
         :running => @middle_at_running,
         :swimming => @middle_at_swimming
@@ -70,7 +71,7 @@ describe "Answer" do
     end
   
     it 'is non-dominated if all scores of the comapred answer are worse for listed criteria even if unlisted criteria are better' do
-      another_answer = Answer.new(@blueprint)
+      another_answer = Answer.new(Guid.id, @blueprint, nil, nil, nil, nil, nil)
       another_answer.instance_variable_set("@scores", {
         :running => @middle_at_running,
         :swimming => @middle_at_swimming,

@@ -27,9 +27,10 @@ class Factory
   extend TestAdapter
 end
 
-def answer_factory(attributes = nil)
+def answer_factory(blueprint, attributes = nil)
+  (blueprint.nil? || blueprint.empty?) ? blueprint = FakeBlueprint.new(blueprint) : nil
   # (id, blueprint, location, origin, parent_ids, created, archived)
-  answer = Answer.new(Guid.id, FakeBlueprint.new, nil, nil, nil, nil, nil)
+  answer = Answer.new(Guid.id, blueprint, nil, nil, nil, nil, nil)
   answer.instance_variable_set("@scores", score_factory(attributes))
   return answer
 end

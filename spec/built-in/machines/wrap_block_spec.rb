@@ -4,9 +4,9 @@ describe WrapBlock do
   before(:each) do
     @machine = WrapBlock.new
     answers = [
-      @a1 = answer_factory(a:1, b:1),
-      @a2 = answer_factory(a:2, b:3),
-      @a3 = answer_factory(a:5, b:6)
+      @a1 = answer_factory('', a:1, b:1),
+      @a2 = answer_factory('', a:2, b:3),
+      @a3 = answer_factory('', a:5, b:6)
     ]
     
     @machine.instance_variable_set("@routes", {
