@@ -27,8 +27,8 @@ describe CloneGroupWinners do
     Factory.should_receive(:load_answers_at_machine).and_return(answers)
   end
   
-  describe "clones winners of tournaments" do
-    it "it with supplied score names" do
+  describe "sends to `created` location, original to `created` location winners of tournaments" do
+    it "of supplied score names" do
       @machine.criteria :a, :b
       mock_every_array_sample.and_return([0,1,2,3,4,5,6])
       @machine.run
@@ -48,6 +48,7 @@ describe CloneGroupWinners do
         Factory.should have_answers(@a2).evolved.in_location('winners')
       end
       
+
       it "set to n" do
         @machine.minimum 2
         mock_every_array_sample.and_return([0,1,2,3,4,5,6], [3,4,5,6,0])
@@ -58,45 +59,18 @@ describe CloneGroupWinners do
     end
   end
   
-  
-  # describe "clones winners of tournaments" do
-  #   before(:each) do
-  #     @machine = CloneGroupWinners.new
-  #   end
-  #   describe "with supplied score names" do
-  #     @machine.criteria(:a)
-  #     @machine.process_answers
-  #   end
-  #   
-  #   describe "until a minimum number of new answers has been reached" do
-  #     before(:each) do
-  #       @machine.criteria  :b
-  #       @machine.group_size 2
-  #     end
-  #     
-  #     it "defaulting to 1 new answer" do
-  #       
-  #     end
-  #     
-  #     it "set to n by the developer" do
-  #       pending
-  #     end
-  #   end
-  #   
-  #   describe "in tournaments sized" do
-  #     describe "7 as default" do
-  #       
-  #     end
-  #     
-  #     describe "as set" do
-  #       
-  #     end
-  #   end
-  #   
-  #   it "labeling winners 'created'" do
-  #   end
-  #   
-  #   it "labeling original answers 'parents'" do
-  #   end
-  # end
+  describe "in tournaments sized" do
+    it "7 as default" do
+      expected_array = [0,1,2,3,4,5,6]
+      mock_every_array_sample(7).and_return(expected_array)
+      @machine.run
+    end
+    
+    it "as set" do
+      expected_array = [0,1,2]
+      mock_every_array_sample(3).and_return(expected_array)
+      @machine.group_size 3
+      @machine.run
+    end
+  end
 end

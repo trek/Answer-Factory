@@ -5,12 +5,16 @@ class MockArraySample
     @instance = mock_sample
   end
   
+  def self.shared_instance
+    @instance
+  end
+  
   def self.return_value_from_mocks(expected_argument)
     @instance.return_value_from_mocks(expected_argument)
   end
   
   def initialize(args)
-    @argument_expectations = args
+    @argument_expectations = args unless args.empty?
     MockArraySample.shared_instance = self
     @index = 0
   end
@@ -20,11 +24,23 @@ class MockArraySample
     self
   end
   
+  def reset_array_sample
+    ::Array.module_eval { alias :sample :stored_sample_method }
+  end
+  
   def return_value_from_mocks(expected_argument)
     sample = @returns[@index]
+    
+    if @argument_expectations
+      unless @argument_expectations[@index] == expected_argument
+        reset_array_sample
+        puts "Array#sample called with #{@argument_expectations[@index]}, expectd it to be called with #{expected_argument}"
+      end
+    end
+    
     @index += 1
     if @index == @returns.size
-      ::Array.module_eval { alias :sample :stored_sample_method }
+      reset_array_sample
     end
     sample
   end
