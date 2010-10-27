@@ -21,7 +21,7 @@ describe WrapBlock do
       @machine.run
       
       Factory.should have_answers(@a1, @a2, @a3).in_location('b')
-      Factory.should have_answers(@a1, @a2, @a3).mutated('wrap_block').once.in_location('a')
+      Factory.should have_answers(@a1, @a2, @a3).evolved_by('wrap_block').once.in_location('a')
     end
     
     it "n times as set" do
@@ -29,7 +29,7 @@ describe WrapBlock do
       @machine.run
       
       Factory.should have_answers(@a1, @a2, @a3).in_location('b')
-      Factory.should have_answers(@a1, @a2, @a3).mutated('wrap_block').twice.in_location('a')
+      Factory.should have_answers(@a1, @a2, @a3).evolved_by('wrap_block').twice.in_location('a')
     end
     
   end

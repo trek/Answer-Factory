@@ -4,7 +4,7 @@ module Matchers
       @expected_answers = expected
     end
     
-    def mutated(*how)
+    def evolved_by(*how)
       @changes = how
       @compare_child_answers = true
       self
