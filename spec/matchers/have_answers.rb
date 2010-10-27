@@ -32,7 +32,11 @@ module Matchers
         @difference = []
         @expected_answers.each do |expected|
           found = @actual.select do |a|
-            a.parent_ids == [expected.id]
+            if @changes
+              a.parent_ids == [expected.id] && a.blueprint.changes == @changes
+            else
+              a.parent_ids == [expected.id]
+            end
           end
           
           if @exact_number_of_created
