@@ -27,4 +27,8 @@ describe Machine do
       :Nudge => [answer_2]
     }
   end
+  
+  describe "unknown labels" do
+    
+  end
 end

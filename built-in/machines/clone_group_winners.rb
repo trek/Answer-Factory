@@ -32,7 +32,7 @@ class CloneGroupWinners < Machine
           break unless nondominated &&= a.nondominated_vs?(b, @criteria)
         end
         
-        created << Answer.new(a.blueprint) if nondominated
+        created << make_answer(a.blueprint, a) if nondominated
       end
     end unless answers.empty? || @group_size == 0
     

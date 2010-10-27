@@ -1,9 +1,10 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe "Answer" do
+  #(id, blueprint, location, origin, parent_ids, created, archived)
   before(:each) do
     @blueprint = FakeBlueprint.new
-    @answer = Answer.new(@blueprint)
+    @answer = Answer.new(Guid.id, @blueprint, nil, nil, nil, nil)
   end
   
   it 'obtains its language from the language of its blueprint' do
