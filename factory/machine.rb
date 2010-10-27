@@ -104,9 +104,7 @@ class Machine
   def answers_keyed_by_language
     hash = Hash.new {|h,k| h[k] = [] }
     
-    answers.each do |answer|
-      hash[answer.language] << answer
-    end
+    answers.each {|answer| hash[answer.language] << answer }
     
     hash
   end
@@ -161,7 +159,7 @@ class Machine
     @answers = nil
     @labeled_answers = {}
     
-    @process ? @process.call : self.process_answers
+    @process ? @process.call : process_answers
     
     answers_to_save = []
     
