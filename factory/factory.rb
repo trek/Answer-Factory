@@ -94,7 +94,7 @@ class Factory
       end
     end
     
-    until @answer_limit && Factory.answer_count > @answer_limit
+    until @answer_limit && Factory.answer_count >= @answer_limit
       machine_loop.each {|m| m.run }
       Factory.cycle!
     end

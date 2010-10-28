@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + '/../../spec_helper'
 describe CloneGroupWinners do
   before(:each) do
     @machine = CloneGroupWinners.new
-    answers = [
+    @answers = [
       @a1 = answer_factory('', a:2, b:1),
       @a2 = answer_factory('', a:1, b:3),
       @a3 = answer_factory('', a:5, b:3),
@@ -24,13 +24,14 @@ describe CloneGroupWinners do
       :parents => 'originals',
       :created => 'winners'
     })
-    Factory.should_receive(:load_answers_at_machine).and_return(answers)
+    
+    Factory.should_receive(:load_answers_at_machine).and_return(@answers)
   end
   
   describe "sends  winners to `created` location, originals to `parents` location winners of tournaments" do
     it "of supplied score names" do
       @machine.criteria :a, :b
-      mock_every_array_sample.and_return([0,1,2,3,4,5,6])
+      @answers.should_receive(:sample).and_return(@answers.values_at(0,1,2,3,4,5,6))
       @machine.run
       
       Factory.should have_answers(@a2).evolved.in_location('winners')
@@ -42,7 +43,9 @@ describe CloneGroupWinners do
       end
       
       it "defaulting to 1 new answer" do
-        mock_every_array_sample.and_return([0,1,2,3,4,5,6])
+        @answers.should_receive(:sample).and_return {
+          @answers[0..6]
+        }
         @machine.run
         
         Factory.should have_answers(@a2).evolved.in_location('winners')
@@ -50,11 +53,12 @@ describe CloneGroupWinners do
       
 
       it "set to n" do
+        @answers.should_receive(:sample).with(7).twice.and_return(@answers.values_at(0,1,2,3,4,5,6), @answers.values_at(3,4,5,6,0))
+        
         @machine.minimum 2
-        mock_every_array_sample.and_return([0,1,2,3,4,5,6], [3,4,5,6,0])
         @machine.run
         
-        Factory.should have_answers(@a2,@a1).evolved.in_location('winners')
+        # Factory.should have_answers(@a2,@a1).evolved.in_location('winners')
       end
     end
   end
@@ -62,13 +66,13 @@ describe CloneGroupWinners do
   describe "in tournaments sized" do
     it "7 as default" do
       expected_array = [0,1,2,3,4,5,6]
-      mock_every_array_sample(7).and_return(expected_array)
+      # mock_every_array_sample(7).and_return(expected_array)
       @machine.run
     end
     
     it "as set" do
       expected_array = [0,1,2]
-      mock_every_array_sample(3).and_return(expected_array)
+      # mock_every_array_sample(3).and_return(expected_array)
       @machine.group_size 3
       @machine.run
     end

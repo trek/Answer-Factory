@@ -1,4 +1,4 @@
-class DoNothing < Machine
+class MockMachine < Machine
   def process_answers
     
   end
