@@ -1,4 +1,4 @@
-module TestAdapter
+module MockAdapter
   def log_comment(comment)
     @_mock_logged_comment = comment
   end
@@ -26,5 +26,5 @@ module TestAdapter
 end
 
 class Factory
-  extend TestAdapter
+  extend MockAdapter
 end
