@@ -67,12 +67,19 @@ describe Factory do
       Factory.start
     end
     
-    it "runs until a minimum desired number of answers is reached" do
-      Factory.stop_at(20)
-      Factory.should_receive(:answer_count).and_return(1,5,19,20)
+    describe "stops when a minimum desired number of answers is" do
+      it "reached exactly" do
+        Factory.stop_at(20)
+        Factory.should_receive(:answer_count).and_return(1,5,19,20)
+
+        Factory.start # should return and not loop forever
+      end
       
-      Factory.start
+      it "surpassed" do
+        Factory.stop_at(20)
+        Factory.should_receive(:answer_count).and_return(1,5,19,50)
+        Factory.start # should return and not loop forever
+      end
     end
-    
   end
 end
