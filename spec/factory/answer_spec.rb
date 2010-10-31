@@ -15,6 +15,7 @@ describe "Answer" do
     before(:each) do
       @answer.instance_variable_set("@scores", {:awesomeness => Score.new('awesomeness', 5, 0, nil, nil)})
     end
+    
     it 'retrived by name if score exists' do
       @answer.get_score(:awesomeness).should == 5
     end
@@ -24,7 +25,14 @@ describe "Answer" do
     end
   end
   
-  describe 'dominated state' do    
+  describe 'dominated state' do
+    it 'is non-dominated if all of the compared answer\'s scores are identical for the listed criteria' do
+      answer = answer_factory('', running: 5, swimming: 5)
+      another_answer = answer_factory('', running: 5, swimming: 5) # <- identically skilled swimmer, runner
+            
+      answer.nondominated_vs?(another_answer, [:swimming,:running]).should == true
+    end
+    
     it 'is dominated if any of the compared answer\'s scores for any listed criteria is better' do
       answer = answer_factory('', running: 5, swimming: 10)
       another_answer = answer_factory('', running: 5, swimming: 1) # <- better swimmer
