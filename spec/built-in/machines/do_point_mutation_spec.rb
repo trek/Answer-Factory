@@ -13,14 +13,23 @@ describe DoPointMutation do
       :created => 'mutated',
       :parents => 'original'
     })
-    Factory.should_receive(:load_answers_at_machine).and_return(answers)
+    Factory.stub!(:load_answers_at_machine).and_return(answers)
   end
   
-  describe "block wraps each answer, sending original to `parents` and mutated to `created" do
+  describe "mutates answers via 'point_mutation'" do
+    it "sending original to `parents`" do
+      @machine.run
+      Factory.should have_answers(@a1, @a2, @a3).in_location('original')
+    end
+    
+    it "sending mutated to `created`" do
+      @machine.run
+      Factory.should have_answers(@a1, @a2, @a3).evolved_by('point_mutation').in_location('mutated')
+    end
+    
     it "once by default" do
       @machine.run
       
-      Factory.should have_answers(@a1, @a2, @a3).in_location('original')
       Factory.should have_answers(@a1, @a2, @a3).evolved_by('point_mutation').once.in_location('mutated')
     end
     
