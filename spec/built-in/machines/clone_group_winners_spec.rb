@@ -28,10 +28,15 @@ describe CloneGroupWinners do
     Factory.should_receive(:load_answers_at_machine).and_return(@answers)
   end
   
+  it "randomness is implemented with Array#sample on answers" do
+    @answers.should_receive(:sample).and_return(@answers.values_at(0,1,2,3,4,5,6))
+    @machine.run
+  end
+  
   describe "sends  winners to `created` location, originals to `parents` location winners of tournaments" do
     it "of supplied score names" do
       @machine.criteria :a, :b
-      @answers.should_receive(:sample).and_return(@answers.values_at(0,1,2,3,4,5,6))
+      @answers.stub!(:sample).and_return(@answers.values_at(0,1,2,3,4,5,6))
       @machine.run
       
       Factory.should have_answers(@a1).evolved.in_location('winners')
@@ -43,7 +48,7 @@ describe CloneGroupWinners do
       end
       
       it "defaulting to 1 new answer" do
-        @answers.should_receive(:sample).and_return(@answers.values_at(0,1,2,3,4,5,6))
+        @answers.stub!(:sample).and_return(@answers.values_at(0,1,2,3,4,5,6))
         @machine.run
         
         Factory.should have_answers(@a1).evolved.in_location('winners')
